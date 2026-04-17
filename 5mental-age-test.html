@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>你的心理年龄是多少？</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#ffecd2 0%,#fcb69f 40%,#ffeaa7 100%);color:#4a3728;min-height:100vh;overflow-x:hidden}
+.section{display:none;min-height:100vh;padding:20px;animation:fadeIn .4s ease}
+.section.active{display:flex;flex-direction:column;align-items:center;justify-content:center}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes bounceIn{0%{opacity:0;transform:scale(.3)}50%{transform:scale(1.05)}70%{transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+.home-emoji{font-size:72px;animation:float 3s ease-in-out infinite;margin-bottom:20px}
+.home-title{font-size:28px;font-weight:900;margin-bottom:8px;background:linear-gradient(90deg,#e17055,#fdcb6e,#e84393,#6c5ce7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% auto;animation:shimmer 3s linear infinite;text-align:center}
+.home-subtitle{font-size:15px;color:rgba(74,55,40,.6);margin-bottom:32px;text-align:center}
+.home-desc{max-width:320px;text-align:center;margin-bottom:32px;background:rgba(255,255,255,.5);border-radius:16px;padding:16px 20px}
+.home-desc p{font-size:13px;color:rgba(74,55,40,.6);line-height:1.8}
+.home-stats{display:flex;gap:24px;margin-bottom:32px}
+.home-stat{text-align:center;background:rgba(255,255,255,.5);border-radius:12px;padding:12px 20px}
+.home-stat .num{font-size:22px;font-weight:800;color:#e17055}
+.home-stat .label{font-size:11px;color:rgba(74,55,40,.5);margin-top:2px}
+.btn-start{background:linear-gradient(135deg,#e17055,#fdcb6e);border:none;color:#fff;font-size:18px;font-weight:700;padding:16px 60px;border-radius:50px;cursor:pointer;box-shadow:0 8px 25px rgba(225,112,85,.4);transition:all .2s}
+.btn-start:active{transform:scale(.95)}
+.home-tip{font-size:12px;color:rgba(74,55,40,.4);margin-top:16px}
+
+.quiz-header{width:100%;max-width:360px;margin-bottom:24px}
+.progress-bar{height:8px;background:rgba(255,255,255,.5);border-radius:4px;overflow:hidden;margin-bottom:12px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#e17055,#fdcb6e);border-radius:4px;transition:width .3s ease}
+.quiz-count{font-size:13px;color:rgba(74,55,40,.5);text-align:right}
+.quiz-question{font-size:19px;font-weight:700;text-align:center;margin-bottom:28px;max-width:340px;line-height:1.6;color:#3d2b1f}
+.quiz-options{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+.quiz-option{background:rgba(255,255,255,.7);border:2px solid rgba(255,255,255,.8);border-radius:16px;padding:16px 20px;font-size:15px;color:#4a3728;cursor:pointer;transition:all .2s;text-align:left;line-height:1.4;backdrop-filter:blur(4px)}
+.quiz-option:active{transform:scale(.97)}
+.quiz-option.selected{background:rgba(225,112,85,.15);border-color:#e17055;box-shadow:0 0 20px rgba(225,112,85,.2)}
+
+#result.active{justify-content:flex-start;padding-top:40px;padding-bottom:40px}
+.result-card{background:rgba(255,255,255,.75);border-radius:24px;padding:32px 24px;max-width:360px;width:100%;text-align:center;animation:bounceIn .6s ease;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.9)}
+.result-age-wrap{margin-bottom:8px}
+.result-age{font-size:72px;font-weight:900;line-height:1;background:linear-gradient(135deg,#e17055,#fdcb6e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:bounceIn .6s ease}
+.result-age-unit{font-size:18px;font-weight:600;color:#e17055}
+.result-age-label{font-size:12px;color:rgba(74,55,40,.5);margin-bottom:16px}
+.result-avatar{font-size:64px;margin:0 auto 16px;animation:float 3s ease-in-out infinite}
+.result-tag{display:inline-block;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:10px;letter-spacing:1px;background:rgba(225,112,85,.15);color:#e17055}
+.result-name{font-size:24px;font-weight:900;margin-bottom:6px;color:#3d2b1f}
+.result-slogan{font-size:13px;color:rgba(74,55,40,.55);margin-bottom:20px;line-height:1.6}
+.traits-wrap{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px}
+.trait-tag{background:rgba(225,112,85,.1);padding:4px 12px;border-radius:12px;font-size:12px;color:#c0392b}
+.dim-bars{width:100%;margin-bottom:20px}
+.dim-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dim-label{font-size:12px;color:rgba(74,55,40,.6);width:52px;text-align:right;flex-shrink:0}
+.dim-bar{flex:1;height:8px;background:rgba(74,55,40,.1);border-radius:4px;overflow:hidden}
+.dim-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#e17055,#fdcb6e);transition:width 1s ease}
+.dim-pct{font-size:11px;color:rgba(74,55,40,.5);width:28px;text-align:right;flex-shrink:0}
+.btn-unlock{background:linear-gradient(135deg,#e17055,#fdcb6e);border:none;color:#fff;font-size:16px;font-weight:700;padding:14px 40px;border-radius:50px;cursor:pointer;box-shadow:0 6px 20px rgba(225,112,85,.4);margin-top:12px;transition:all .2s;display:flex;align-items:center;gap:8px;margin-left:auto;margin-right:auto}
+.btn-unlock:active{transform:scale(.95)}
+.btn-unlock:disabled{opacity:.62;transform:none}
+.btn-retry{background:transparent;border:none;color:rgba(74,55,40,.4);font-size:13px;cursor:pointer;margin-top:14px;text-decoration:underline}
+
+.analysis-section{max-width:360px;width:100%;margin-top:20px}
+.analysis-card{background:rgba(255,255,255,.7);border-radius:16px;padding:20px;margin-bottom:14px;border:1px solid rgba(255,255,255,.9);animation:slideUp .4s ease both;backdrop-filter:blur(4px)}
+.analysis-card:nth-child(2){animation-delay:.05s}.analysis-card:nth-child(3){animation-delay:.1s}.analysis-card:nth-child(4){animation-delay:.15s}.analysis-card:nth-child(5){animation-delay:.2s}.analysis-card:nth-child(6){animation-delay:.25s}
+.analysis-card h3{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px;color:#3d2b1f}
+.analysis-card p{font-size:13.5px;color:rgba(74,55,40,.75);line-height:1.7}
+.quote-box{background:linear-gradient(135deg,rgba(225,112,85,.08),rgba(253,203,110,.08));border-radius:16px;padding:24px 20px;text-align:center;border:1px solid rgba(225,112,85,.15);margin-bottom:14px}
+.quote-text{font-size:16px;font-style:italic;color:#4a3728;line-height:1.6;margin-bottom:8px}
+.quote-attr{font-size:12px;color:rgba(74,55,40,.4)}
+.compat-grid{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.compat-item{flex:0 0 calc(33.33% - 6px);background:rgba(225,112,85,.06);border-radius:12px;padding:10px 6px;text-align:center}
+.compat-emoji{font-size:24px;margin-bottom:2px}
+.compat-label{font-size:10px;color:rgba(74,55,40,.5)}
+.compat-pct{font-size:13px;font-weight:700;margin-top:2px;color:#e17055}
+
+.ad-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;flex-direction:column;align-items:center;justify-content:center}
+.ad-overlay.active{display:flex}
+.ad-box{background:linear-gradient(135deg,#fff9f0,#fff3e0);border-radius:20px;padding:40px 30px;text-align:center;max-width:320px;width:90%}
+.ad-label{font-size:12px;color:rgba(74,55,40,.4);margin-bottom:16px;letter-spacing:2px}
+.ad-content{font-size:48px;margin-bottom:20px}
+.ad-title{font-size:16px;font-weight:600;margin-bottom:20px;color:#4a3728;line-height:1.6}
+.ad-progress{height:4px;background:rgba(74,55,40,.1);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.ad-progress-fill{height:100%;background:linear-gradient(90deg,#e17055,#fdcb6e);border-radius:2px;width:0;transition:width .3s linear}
+.ad-timer{font-size:14px;color:rgba(74,55,40,.5);margin-bottom:16px}
+.btn-ad-close{background:linear-gradient(135deg,#e17055,#fdcb6e);border:none;color:#fff;font-size:14px;padding:10px 36px;border-radius:50px;cursor:pointer;display:none;transition:all .2s}
+.btn-ad-close:active{transform:scale(.95)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(74,55,40,.8);backdrop-filter:blur(10px);padding:10px 24px;border-radius:20px;font-size:13px;color:#fff;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+.toast.show{opacity:1}
+.scroll-hint{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);text-align:center;color:rgba(74,55,40,.5);font-size:13px;z-index:50;animation:scrollBounce 1.5s ease-in-out infinite;transition:opacity .5s}
+.scroll-hint .arrow{font-size:18px;display:block;margin-top:2px}
+@keyframes scrollBounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.bg-particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.bg-particle{position:absolute;opacity:.12;animation:particleFloat linear infinite}
+@keyframes particleFloat{0%{transform:translateY(110vh) rotate(0deg)}100%{transform:translateY(-20vh) rotate(360deg)}}
+.section{position:relative;z-index:1}
+</style>
+</head>
+<body>
+<div class="bg-particles" id="bgParticles"></div>
+<div class="section active" id="home">
+  <div class="home-emoji">🎂</div>
+  <h1 class="home-title">你的心理年龄是多少？</h1>
+  <p class="home-subtitle">20道题精准测出你的真实心理年龄</p>
+  <div class="home-desc"><p>基于心理学研究，从思维方式、情感表达、生活态度等多维度分析你的心理成熟度</p></div>
+  <div class="home-stats">
+    <div class="home-stat"><div class="num">20</div><div class="label">精选题目</div></div>
+    <div class="home-stat"><div class="num">5</div><div class="label">年龄阶段</div></div>
+    <div class="home-stat"><div class="num">5</div><div class="label">维度分析</div></div>
+  </div>
+  <button class="btn-start" onclick="startQuiz()">开始测试</button>
+  <p class="home-tip">测试约需3分钟 · 结果仅供娱乐</p>
+</div>
+<div class="section" id="quiz">
+  <div class="quiz-header"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><div class="quiz-count" id="quizCount"></div></div>
+  <div class="quiz-question" id="quizQuestion"></div>
+  <div class="quiz-options" id="quizOptions"></div>
+</div>
+<div class="section" id="result"></div>
+<div class="ad-overlay" id="adOverlay">
+  <div class="ad-box">
+    <div class="ad-label">— 激励视频 —</div><div class="ad-content">🎁</div>
+    <div class="ad-title" id="adTitle">正在拉起激励视频</div>
+    <div class="ad-progress"><div class="ad-progress-fill" id="adProgressFill"></div></div>
+    <div class="ad-timer" id="adTimer">进入广告后 8 秒自动解锁</div>
+    <button class="btn-ad-close" id="adCloseBtn" onclick="closeAd()">取消等待，重新观看</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// ===== 内嵌 ToBid 激励视频桥接组件，部署 5mental-age-test.html 时不再依赖外部 JS 文件 =====
+/*
+ * ToBid H5 rewarded-video bridge.
+ *
+ * This file only wraps the App WebView bridge methods:
+ * adRequest, preLoadVideo and connectVideo.
+ *
+ * Business rules such as "unlock after 8 seconds" should live in each game page,
+ * because different games may use different reward policies.
+ */
+(function (root) {
+  "use strict";
+
+  var DEFAULTS = {
+    adUrl: "https://ap.dongqiudi.com/plat/v3",
+    pgid: "1.15.2",
+    origin: "tobid",
+    sdkId: "6362731749334746",
+    sceneId: "leagueCollect_14",
+    data: {},
+    bridgeTimeout: 5000,
+    // Some native bridge methods do not callback reliably; keep this short so
+    // the page layer can recover, retry or apply its own fallback policy.
+    callbackTimeout: 8000,
+    onLog: null
+  };
+
+  function extend(target) {
+    var i;
+    var key;
+    var source;
+    target = target || {};
+    for (i = 1; i < arguments.length; i += 1) {
+      source = arguments[i] || {};
+      for (key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  }
+
+  function isFunction(value) {
+    return typeof value === "function";
+  }
+
+  function toError(error) {
+    if (error instanceof Error) return error;
+    return new Error(String(error || "unknown error"));
+  }
+
+  function safeJsonParse(value) {
+    if (typeof value !== "string") return value;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return value;
+    }
+  }
+
+  function unwrapNativeResponse(response) {
+    var body = response && response._responseWrapedByNative ? response._responseWrapedByNative : response;
+    return safeJsonParse(body);
+  }
+
+  function findRewardAd(body) {
+    var data = body;
+    var i;
+    if (body && Object.prototype.toString.call(body.data) === "[object Array]") {
+      data = body.data;
+    }
+    if (Object.prototype.toString.call(data) !== "[object Array]") return null;
+    for (i = 0; i < data.length; i += 1) {
+      if (data[i] && data[i].ad_type === "sdk_rewarded_video") {
+        return data[i];
+      }
+    }
+    return null;
+  }
+
+  function ensureBridgeConnector() {
+    if (root.connectWebViewJavascriptBridge) return;
+
+    root.connectWebViewJavascriptBridge = function (callback) {
+      var iframe;
+
+      if (root.WebViewJavascriptBridge) {
+        if (!root.WebViewJavascriptBridge._messageHandler && root.WebViewJavascriptBridge.init) {
+          root.WebViewJavascriptBridge.init(function () {});
+        }
+        callback(root.WebViewJavascriptBridge);
+        return;
+      }
+
+      document.addEventListener("WebViewJavascriptBridgeReady", function () {
+        if (root.WebViewJavascriptBridge && !root.WebViewJavascriptBridge._messageHandler && root.WebViewJavascriptBridge.init) {
+          root.WebViewJavascriptBridge.init(function () {});
+        }
+        callback(root.WebViewJavascriptBridge);
+      }, false);
+
+      if (root.WVJBCallbacks) {
+        root.WVJBCallbacks.push(callback);
+        return;
+      }
+
+      root.WVJBCallbacks = [callback];
+      iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = "https://__bridge_loaded__";
+      document.documentElement.appendChild(iframe);
+      setTimeout(function () {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      }, 0);
+    };
+  }
+
+  function RewardVideoBridge(options) {
+    this.options = extend({}, DEFAULTS, options || {});
+    this.currentPayload = null;
+  }
+
+  RewardVideoBridge.prototype.log = function (title, data) {
+    if (isFunction(this.options.onLog)) {
+      this.options.onLog(title, data);
+    }
+    if (root.console && root.console.log) {
+      root.console.log("[RewardVideoBridge] " + title, data || "");
+    }
+  };
+
+  RewardVideoBridge.prototype.getBridge = function (callback) {
+    var self = this;
+    var done = false;
+    var timer;
+
+    ensureBridgeConnector();
+
+    timer = setTimeout(function () {
+      if (done) return;
+      done = true;
+      callback(new Error("未检测到 WebViewJavascriptBridge"));
+    }, this.options.bridgeTimeout);
+
+    root.connectWebViewJavascriptBridge(function (bridge) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (bridge && bridge.callHandler) {
+        self.log("bridge ready");
+        callback(null, bridge);
+      } else {
+        callback(new Error("桥对象存在，但没有 callHandler 方法"));
+      }
+    });
+  };
+
+  RewardVideoBridge.prototype.callHandler = function (name, params, callback) {
+    var self = this;
+    var cb = isFunction(callback) ? callback : function () {};
+
+    this.log("callHandler: " + name, params);
+    this.getBridge(function (bridgeError, bridge) {
+      var done;
+      var timer;
+
+      if (bridgeError) {
+        self.log(name + " bridge error", { message: bridgeError.message });
+        cb(bridgeError);
+        return;
+      }
+
+      done = false;
+      timer = setTimeout(function () {
+        if (done) return;
+        done = true;
+        self.log(name + " callback timeout");
+        cb(null, null, { timeout: true });
+      }, self.options.callbackTimeout);
+
+      try {
+        bridge.callHandler(name, params || {}, function (response) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          self.log(name + " callback", response);
+          cb(null, response, { timeout: false });
+        });
+      } catch (error) {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        self.log(name + " call error", { message: error.message });
+        cb(error);
+      }
+    });
+  };
+
+  RewardVideoBridge.prototype.detectBridge = function (callback) {
+    this.getBridge(function (error) {
+      if (isFunction(callback)) callback(error || null);
+    });
+  };
+
+  RewardVideoBridge.prototype.buildDefaultPayload = function (options) {
+    var opts = extend({}, this.options, options || {});
+    if (!opts.sdkId && !opts.sdk_id) {
+      throw new Error("缺少 sdkId，无法请求激励视频广告位");
+    }
+    return {
+      origin: opts.origin || "",
+      sdk_id: opts.sdk_id || opts.sdkId,
+      imp_mon_arr: opts.imp_mon_arr || opts.impMonArr || [],
+      click_mon_arr: opts.click_mon_arr || opts.clickMonArr || [],
+      ct: opts.ct || "",
+      pgid: opts.pgid || this.options.pgid
+    };
+  };
+
+  RewardVideoBridge.prototype.setPayload = function (payload) {
+    this.currentPayload = extend({}, payload || {});
+    return this.currentPayload;
+  };
+
+  RewardVideoBridge.prototype.getPayload = function () {
+    return this.currentPayload;
+  };
+
+  RewardVideoBridge.prototype.preloadPayload = function (payload, callback) {
+    var finalPayload = this.setPayload(payload);
+    this.callHandler("preLoadVideo", finalPayload, callback);
+  };
+
+  RewardVideoBridge.prototype.preload = function (options, callback) {
+    var payload;
+    var cb = callback;
+    if (isFunction(options)) {
+      cb = options;
+      options = {};
+    }
+
+    try {
+      payload = this.buildDefaultPayload(options);
+    } catch (error) {
+      if (isFunction(cb)) cb(toError(error));
+      return;
+    }
+
+    this.preloadPayload(payload, cb);
+  };
+
+  RewardVideoBridge.prototype.loadFromConfig = function (options, callback) {
+    var self = this;
+    var opts = options || {};
+    var cb = callback;
+
+    if (isFunction(options)) {
+      cb = options;
+      opts = {};
+    }
+
+    this.callHandler("adRequest", {
+      method: "get",
+      url: opts.adUrl || this.options.adUrl,
+      param: {
+        pgid: opts.pgid || this.options.pgid
+      }
+    }, function (error, response) {
+      var body;
+      var ad;
+      var payload;
+
+      if (error) {
+        if (isFunction(cb)) cb(error);
+        return;
+      }
+
+      body = unwrapNativeResponse(response);
+      self.log("adRequest unwrapped", body);
+      ad = findRewardAd(body);
+      if (!ad) {
+        if (isFunction(cb)) cb(new Error("adRequest 没找到 ad_type=sdk_rewarded_video 的广告"));
+        return;
+      }
+
+      payload = {
+        origin: ad.ad_source && ad.ad_source.sdk_origin,
+        sdk_id: ad.ad_source && ad.ad_source.sdk_position_id,
+        imp_mon_arr: ad.imp_mon_arr || [],
+        click_mon_arr: ad.click_mon_arr || [],
+        ct: "",
+        pgid: opts.pgid || self.options.pgid
+      };
+
+      if (!payload.sdk_id) {
+        if (isFunction(cb)) cb(new Error("广告配置里没有 ad_source.sdk_position_id"));
+        return;
+      }
+
+      self.preloadPayload(payload, function (preloadError, preloadResponse, meta) {
+        if (isFunction(cb)) cb(preloadError || null, payload, preloadResponse, meta);
+      });
+    });
+  };
+
+  RewardVideoBridge.prototype.show = function (options, callback) {
+    var opts = options || {};
+    var cb = callback;
+    var base;
+    var payload;
+
+    if (isFunction(options)) {
+      cb = options;
+      opts = {};
+    }
+
+    try {
+      base = this.currentPayload || this.buildDefaultPayload(opts);
+      payload = extend({
+        id: opts.id || opts.sceneId || this.options.sceneId,
+        data: opts.data || this.options.data || {}
+      }, base);
+    } catch (error) {
+      if (isFunction(cb)) cb(toError(error));
+      return;
+    }
+
+    this.callHandler("connectVideo", payload, cb);
+  };
+
+  RewardVideoBridge.prototype.preloadThenShow = function (options, callback) {
+    var self = this;
+    var opts = options || {};
+    var cb = callback;
+
+    if (isFunction(options)) {
+      cb = options;
+      opts = {};
+    }
+
+    this.preload(opts, function (error) {
+      if (error) {
+        if (isFunction(cb)) cb(error);
+        return;
+      }
+      self.show(opts, cb);
+    });
+  };
+
+  RewardVideoBridge.prototype.loadFromConfigThenShow = function (options, callback) {
+    var self = this;
+    var opts = options || {};
+    var cb = callback;
+
+    if (isFunction(options)) {
+      cb = options;
+      opts = {};
+    }
+
+    this.loadFromConfig(opts, function (error) {
+      if (error) {
+        if (isFunction(cb)) cb(error);
+        return;
+      }
+      self.show(opts, cb);
+    });
+  };
+
+  root.RewardVideoBridge = {
+    create: function (options) {
+      return new RewardVideoBridge(options);
+    },
+    Constructor: RewardVideoBridge
+  };
+})(window);
+
+</script>
+<script>
+(function(){
+  const icons=['🎈','🎨','🎭','🎪','🎯','🎲','🎸','🎹','🎺','🎻','🌈','🌟','⭐','💫','✨','🌸','🌺','🌻','🌼','🍀'];
+  const container=document.getElementById('bgParticles');
+  for(let i=0;i<20;i++){
+    const span=document.createElement('span');
+    span.className='bg-particle';
+    span.textContent=icons[Math.floor(Math.random()*icons.length)];
+    span.style.left=Math.random()*100+'%';
+    span.style.fontSize=(20+Math.random()*24)+'px';
+    span.style.animationDuration=(15+Math.random()*20)+'s';
+    span.style.animationDelay=(-Math.random()*20)+'s';
+    container.appendChild(span);
+  }
+})();
+// 5维: 0成熟度 1活力 2情感 3理性 4社交
+const Q=[
+{q:'周末突然没有任何计划，你会？',opts:[
+{text:'感到焦虑，赶紧找点事做',s:[1,3,1,1,1]},
+{text:'开心！终于可以躺平了',s:[2,2,2,1,1]},
+{text:'规划一下，做点有意义的事',s:[3,1,2,3,1]},
+{text:'约朋友出去玩，不能浪费',s:[2,3,1,1,3]}]},
+{q:'看到路边一只流浪猫，你的第一反应是？',opts:[
+{text:'好可怜，想带回家养',s:[1,2,3,1,2]},
+{text:'拍张照发朋友圈',s:[2,2,2,1,3]},
+{text:'给它买点吃的就好，不能养',s:[3,1,3,3,2]},
+{text:'继续走，没太在意',s:[3,1,1,3,1]}]},
+{q:'朋友向你借钱，你会？',opts:[
+{text:'直接借，朋友嘛',s:[1,2,3,1,3]},
+{text:'问清楚用途和还款时间再决定',s:[3,1,2,3,2]},
+{text:'找借口拒绝，怕伤感情',s:[2,1,2,2,2]},
+{text:'借，但心里会有点担心',s:[2,1,3,2,2]}]},
+{q:'你对"人生意义"这个问题的态度是？',opts:[
+{text:'经常思考，觉得很重要',s:[3,1,3,3,1]},
+{text:'偶尔想想，但不纠结',s:[3,2,2,3,2]},
+{text:'活在当下就好，想太多累',s:[1,3,2,1,2]},
+{text:'这个问题太沉重了，不想想',s:[1,2,1,1,1]}]},
+{q:'面对一件很难的事，你通常？',opts:[
+{text:'先拖着，等到不得不做',s:[1,2,1,1,1]},
+{text:'拆解成小步骤，一步步来',s:[3,2,2,3,2]},
+{text:'找人帮忙或寻求建议',s:[2,2,2,2,3]},
+{text:'硬着头皮冲，做完再说',s:[2,3,1,2,1]}]},
+{q:'你上一次真正大哭是什么时候？',opts:[
+{text:'最近就有，情绪来了就哭',s:[1,2,3,1,2]},
+{text:'很久了，不太容易哭',s:[3,1,1,3,1]},
+{text:'记不清了，但偶尔会',s:[2,1,2,2,1]},
+{text:'看电影或听歌时会被触动',s:[2,2,3,2,2]}]},
+{q:'你怎么看待"失败"？',opts:[
+{text:'很难受，需要很久才能恢复',s:[1,1,3,1,1]},
+{text:'难受，但会总结经验继续',s:[3,2,2,3,2]},
+{text:'失败是常态，没什么大不了',s:[3,3,1,3,1]},
+{text:'尽量避免失败，不想面对',s:[1,1,2,1,1]}]},
+{q:'你的手机屏幕使用时间通常是？',opts:[
+{text:'6小时以上，停不下来',s:[1,3,1,1,2]},
+{text:'3-5小时，算正常吧',s:[2,2,2,2,2]},
+{text:'2小时以内，有意识控制',s:[3,2,2,3,1]},
+{text:'不固定，忙的时候少',s:[2,2,2,2,2]}]},
+{q:'和父母的关系，你觉得？',opts:[
+{text:'很亲密，无话不谈',s:[2,2,3,1,3]},
+{text:'有距离感，但互相关心',s:[3,1,2,3,2]},
+{text:'经常有矛盾，不太理解彼此',s:[1,2,2,1,2]},
+{text:'保持礼貌，各自生活',s:[3,1,1,3,1]}]},
+{q:'你对"稳定"的态度是？',opts:[
+{text:'稳定最重要，不喜欢变化',s:[3,1,2,3,1]},
+{text:'稳定会无聊，喜欢新鲜感',s:[1,3,2,1,2]},
+{text:'稳定是基础，但也要有突破',s:[3,2,2,3,2]},
+{text:'随缘，顺其自然',s:[2,2,2,2,2]}]},
+{q:'你最近一次道歉是因为什么？',opts:[
+{text:'自己确实做错了，主动道歉',s:[3,1,3,3,2]},
+{text:'为了平息矛盾，不一定是我的错',s:[2,1,2,2,2]},
+{text:'记不清了，不太爱道歉',s:[2,2,1,2,1]},
+{text:'对方情绪不好，先哄着',s:[2,1,3,1,3]}]},
+{q:'你如何处理自己的负面情绪？',opts:[
+{text:'找人倾诉，说出来就好了',s:[2,2,3,1,3]},
+{text:'自己消化，不想麻烦别人',s:[3,1,2,3,1]},
+{text:'转移注意力，做点别的事',s:[2,3,1,2,1]},
+{text:'让情绪发泄出来，哭或发脾气',s:[1,2,3,1,1]}]},
+{q:'对于"存钱"这件事，你是？',opts:[
+{text:'每月固定存，有计划',s:[3,1,1,3,1]},
+{text:'想存但总存不住',s:[1,2,2,1,2]},
+{text:'先享受生活，存钱以后再说',s:[1,3,2,1,2]},
+{text:'有余钱才存，没有计划',s:[2,2,2,2,2]}]},
+{q:'你觉得自己现在的状态是？',opts:[
+{text:'很充实，生活有目标',s:[3,3,2,3,2]},
+{text:'有点迷茫，不知道方向',s:[1,1,2,1,1]},
+{text:'平静，没什么大起伏',s:[3,2,2,3,2]},
+{text:'有点累，需要休息',s:[2,1,2,2,1]}]},
+{q:'你对"孤独"的感受是？',opts:[
+{text:'很害怕孤独，需要陪伴',s:[1,2,3,1,3]},
+{text:'偶尔享受独处，但不能太久',s:[3,2,2,3,2]},
+{text:'很享受一个人的时光',s:[3,1,1,3,1]},
+{text:'孤独让我感到自由',s:[3,2,1,3,1]}]},
+{q:'遇到不公平的事，你会？',opts:[
+{text:'当场表达不满',s:[2,3,2,1,2]},
+{text:'忍下来，事后抱怨',s:[1,1,2,1,1]},
+{text:'理性分析，找合适时机沟通',s:[3,1,2,3,2]},
+{text:'算了，不值得计较',s:[3,2,1,3,1]}]},
+{q:'你对"改变自己"的态度是？',opts:[
+{text:'一直在努力改变，成长很重要',s:[3,3,2,3,2]},
+{text:'想改变，但很难坚持',s:[1,2,2,1,1]},
+{text:'接受自己，不强迫改变',s:[3,1,2,3,1]},
+{text:'改变太累了，顺其自然',s:[1,1,2,1,1]}]},
+{q:'你最近有没有学一样新东西？',opts:[
+{text:'有！一直在学新东西',s:[3,3,2,3,2]},
+{text:'有在想，但还没开始',s:[1,2,1,1,1]},
+{text:'没有，生活已经够忙了',s:[2,1,1,2,1]},
+{text:'偶尔学一点，不系统',s:[2,2,2,2,2]}]},
+{q:'你觉得"快乐"最重要的来源是？',opts:[
+{text:'和喜欢的人在一起',s:[2,2,3,1,3]},
+{text:'做自己喜欢的事',s:[2,3,2,2,1]},
+{text:'实现目标和成就感',s:[3,2,1,3,1]},
+{text:'内心平静，没有烦恼',s:[3,1,2,3,1]}]},
+{q:'如果可以选择，你希望自己的心理年龄是？',opts:[
+{text:'永远18岁，青春无敌',s:[1,3,2,1,2]},
+{text:'25岁左右，活力与成熟并存',s:[2,3,2,2,2]},
+{text:'30多岁，稳重有智慧',s:[3,1,2,3,2]},
+{text:'无所谓，顺其自然',s:[3,2,2,3,1]}]}
+];
+// 5个年龄段类型，range=[min,max]
+const TYPES=[
+{range:[0,10],name:'幼年心态',emoji:'🍭',tag:'CHILD',slogan:'世界就是一个大游乐场',
+traits:['天真烂漫','活在当下','情绪直接','充满好奇'],
+desc:'你的内心保留着最纯粹的童真。你不喜欢复杂，喜欢简单直接，情绪来了就表达，开心就笑，不开心就闹。这种纯粹在成人世界里反而是一种稀缺的可爱。',
+quote:'"最幸福的人，是那些从未失去童心的人。"',quoteAttr:'—— 赫尔曼·黑塞',
+compat:[{name:'少年心态',emoji:'🌱',pct:90},{name:'青年心态',emoji:'🦋',pct:75},{name:'老年心态',emoji:'🌳',pct:60}],
+advice:'保持这份天真，但也试着学习一点点耐心，世界会更有趣。'},
+{range:[11,20],name:'少年心态',emoji:'🌱',tag:'TEEN',slogan:'热血沸腾，冲就完了',
+traits:['活力爆棚','感性冲动','渴望认同','敢想敢做'],
+desc:'你的心理年龄正值青春期最燃的阶段。你充满能量，对一切充满热情，有时冲动但真实，不喜欢被束缚，渴望自由和被理解。这股劲儿是你最大的财富。',
+quote:'"年轻就是资本，但方向比速度更重要。"',quoteAttr:'—— 每个20岁的自己',
+compat:[{name:'幼年心态',emoji:'🍭',pct:85},{name:'青年心态',emoji:'🦋',pct:92},{name:'中年心态',emoji:'🍁',pct:70}],
+advice:'冲动前深呼吸三秒，你会发现很多事没那么紧迫，但热情千万别丢。'},
+{range:[21,30],name:'青年心态',emoji:'🦋',tag:'YOUTH',slogan:'在探索中找到自己的答案',
+traits:['充满活力','渴望探索','偶尔迷茫','重视体验'],
+desc:'你正处于人生最精彩的探索期。有热情有想法，但有时迷失方向。你重视体验胜过结果，喜欢尝试新事物，对未来既期待又有些不安。这种状态其实很珍贵。',
+quote:'"不是所有迷路都是错误，有时候是在寻找更好的路。"',quoteAttr:'—— 探索者的自白',
+compat:[{name:'少年心态',emoji:'🌱',pct:88},{name:'中年心态',emoji:'🍁',pct:85},{name:'老年心态',emoji:'🌳',pct:72}],
+advice:'允许自己迷茫，但不要停止行动。每一次尝试都是答案。'},
+{range:[31,45],name:'中年心态',emoji:'🍁',tag:'MATURE',slogan:'沉淀之后，更懂得珍惜',
+traits:['理性成熟','有责任感','懂得取舍','内心稳定'],
+desc:'你拥有超越年龄的成熟与智慧。理性、稳重，能在复杂情况下保持冷静。你懂得什么值得坚持，什么应该放手，内心有一种安静的力量。',
+quote:'"真正的成熟，是接受生活本来的样子，同时不放弃改变它。"',quoteAttr:'—— 智者的平静',
+compat:[{name:'青年心态',emoji:'🦋',pct:88},{name:'老年心态',emoji:'🌳',pct:90},{name:'少年心态',emoji:'🌱',pct:75}],
+advice:'你的稳重是财富，但别忘了偶尔放下包袱，让自己轻松一下。'},
+{range:[46,70],name:'老年心态',emoji:'🌳',tag:'WISE',slogan:'看透了，所以更自在',
+traits:['豁达通透','不执于物','内心自由','淡然从容'],
+desc:'你拥有难得的通透与豁达。不再执着于得失，能以平和心态看待生活起伏。你的内心有一种深沉的自由，不被外界轻易影响，这是一种很高的境界。',
+quote:'"人生到了最后，你会发现最值得的投资，是内心的平静。"',quoteAttr:'—— 通透者的感悟',
+compat:[{name:'中年心态',emoji:'🍁',pct:92},{name:'青年心态',emoji:'🦋',pct:80},{name:'少年心态',emoji:'🌱',pct:65}],
+advice:'你的智慧是宝藏，愿意的话，可以多分享给身边的人。'}
+];
+const DIM_NAMES=['成熟度','活力值','情感力','理性度','社交力'];
+let cur=0,scores=new Array(5).fill(0),answered=false;
+let rewardAd=null,rewardAdInited=false,rewardAdLoading=false,rewardAdSessionId=0;
+let rewardAdUnlockTimer=null,rewardAdLaunchFallbackTimer=null,rewardAdProgressTimer=null;
+let rewardAdWatchStartedAt=0,rewardAdWatchDelay=8000;
+const rewardAdLogPrefix='[mental-age-reward]';
+function startQuiz(){cur=0;scores=new Array(5).fill(0);show('quiz');renderQ()}
+function show(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function renderQ(){
+  answered=false;const q=Q[cur];
+  document.getElementById('progressFill').style.width=((cur/Q.length)*100)+'%';
+  document.getElementById('quizCount').textContent=(cur+1)+' / '+Q.length;
+  document.getElementById('quizQuestion').textContent=q.q;
+  const w=document.getElementById('quizOptions');w.innerHTML='';
+  q.opts.forEach((o,i)=>{const d=document.createElement('div');d.className='quiz-option';d.textContent=o.text;d.onclick=()=>selectOpt(i);w.appendChild(d)});
+}
+function selectOpt(i){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.quiz-option')[i].classList.add('selected');
+  Q[cur].opts[i].s.forEach((v,j)=>scores[j]+=v);
+  setTimeout(()=>{cur++;cur<Q.length?renderQ():showResult()},350);
+}
+function calcAge(){
+  const mat=scores[0],vit=scores[1],rat=scores[3];
+  const maxS=60;
+  const oldScore=(mat+rat)/(maxS*2);
+  const youngScore=vit/maxS;
+  const t=Math.min(1,Math.max(0,oldScore-youngScore*0.6+0.3));
+  const segIdx=Math.max(0,Math.min(4,Math.round(t*4+(Math.random()-0.5)*1.5)));
+  const [lo,hi]=TYPES[segIdx].range;
+  const age=lo+Math.floor(Math.random()*(hi-lo+1));
+  return {ti:segIdx,age};
+}
+function getType(){return calcAge();}
+function showResult(){
+  show('result');
+  const result=getType();
+  const ti=result.ti;
+  const age=result.age;
+  const t=TYPES[ti];
+  // 维度值基于答题分数归一化，满分60
+  const maxS=60;
+  const dimValues=scores.map(s=>Math.min(99,Math.round(s/maxS*100)));
+  const el=document.getElementById('result');
+  el.className='section active';
+  el.innerHTML=`
+    <div class="result-card">
+      <div class="result-age-wrap"><span class="result-age">${age}</span><span class="result-age-unit">岁</span></div>
+      <div class="result-age-label">心理年龄</div>
+      <div class="result-avatar">${t.emoji}</div>
+      <div class="result-tag">${t.tag}</div>
+      <div class="result-name">${t.name}</div>
+      <div class="result-slogan">${t.slogan}</div>
+      <div class="traits-wrap">${t.traits.map(x=>`<span class="trait-tag">${x}</span>`).join('')}</div>
+      <div class="dim-bars">${DIM_NAMES.map((n,i)=>{
+        const pct=dimValues[i];
+        return `<div class="dim-row"><div class="dim-label">${n}</div><div class="dim-bar"><div class="dim-fill" style="width:0%" data-w="${pct}"></div></div><div class="dim-pct">${pct}</div></div>`;
+      }).join('')}</div>
+      <button class="btn-unlock" id="rewardUnlockBtn" onclick="showAd()">🔓 查看激励视频解锁深度解析</button>
+      <button class="btn-retry" onclick="retry()">重新测试</button>
+    </div>
+    <div class="analysis-section" id="analysisSection" style="display:none">
+      <div class="quote-box"><div class="quote-text">${t.quote}</div><div class="quote-attr">${t.quoteAttr}</div></div>
+      <div class="analysis-card"><h3>🔍 深度解析</h3><p>${t.desc}</p></div>
+      <div class="analysis-card"><h3>💞 心理相性</h3><div class="compat-grid">${t.compat.map(c=>`<div class="compat-item"><div class="compat-emoji">${c.emoji}</div><div class="compat-label">${c.name}</div><div class="compat-pct">${c.pct}%</div></div>`).join('')}</div></div>
+      <div class="analysis-card"><h3>💡 成长建议</h3><p>${t.advice}</p></div>
+      <button class="btn-retry" onclick="retry()">重新测试</button>
+    </div>`;
+  setTimeout(()=>{
+    document.querySelectorAll('.dim-fill').forEach(el=>{el.style.transition='width 1s ease';el.style.width=el.dataset.w+'%'});
+  },100);
+  const hint=document.createElement('div');hint.className='scroll-hint';hint.innerHTML='向下滑动查看完整报告<span class="arrow">↓</span>';document.body.appendChild(hint);
+  setTimeout(()=>{hint.style.opacity='0';setTimeout(()=>hint.remove(),500)},3000);
+  window.addEventListener('scroll',()=>{hint.style.opacity='0';setTimeout(()=>hint.remove(),500)},{once:true});
+}
+function logRewardAd(title,data){
+  if(window.console&&console.log)console.log(rewardAdLogPrefix,title,data||'');
+}
+function initRewardAd(){
+  if(rewardAdInited)return !!rewardAd;
+  rewardAdInited=true;
+  if(!window.RewardVideoBridge){
+    toast('激励视频组件加载失败');
+    logRewardAd('RewardVideoBridge missing');
+    return false;
+  }
+  rewardAd=RewardVideoBridge.create({
+    origin:'tobid',
+    sdkId:'6362731749334746',
+    sceneId:'leagueCollect_14',
+    pgid:'1.15.2',
+    callbackTimeout:8000,
+    data:{from:'mental-age-test',reward:'unlock_analysis'},
+    onLog:logRewardAd
+  });
+  rewardAd.detectBridge(error=>{
+    if(error){logRewardAd('bridge detect failed',{message:error.message});return}
+    logRewardAd('bridge detected');
+  });
+  return true;
+}
+function preloadRewardAd(silent){
+  if(!rewardAd&&!initRewardAd())return;
+  rewardAd.preload((error,response,meta)=>{
+    if(error){
+      logRewardAd('preload failed',{message:error.message});
+      if(!silent)toast('激励视频预加载失败，请稍后再试');
+      return;
+    }
+    logRewardAd('preload called',{response,meta});
+  });
+}
+function setUnlockButtonLoading(loading){
+  const btn=document.getElementById('rewardUnlockBtn');
+  if(!btn)return;
+  btn.disabled=loading;
+  btn.textContent=loading?'正在打开激励视频':'🔓 查看激励视频解锁深度解析';
+}
+function showRewardAdOverlay(title,desc){
+  const ov=document.getElementById('adOverlay');
+  const fill=document.getElementById('adProgressFill');
+  document.getElementById('adTitle').innerHTML=title;
+  document.getElementById('adTimer').textContent=desc;
+  document.getElementById('adCloseBtn').style.display='inline-block';
+  fill.style.width='0';
+  ov.classList.add('active');
+}
+function clearRewardAdTimers(){
+  if(rewardAdUnlockTimer){clearTimeout(rewardAdUnlockTimer);rewardAdUnlockTimer=null}
+  if(rewardAdLaunchFallbackTimer){clearTimeout(rewardAdLaunchFallbackTimer);rewardAdLaunchFallbackTimer=null}
+  if(rewardAdProgressTimer){clearInterval(rewardAdProgressTimer);rewardAdProgressTimer=null}
+}
+function resetRewardAdWaiting(message){
+  rewardAdSessionId++;
+  rewardAdLoading=false;
+  rewardAdWatchStartedAt=0;
+  clearRewardAdTimers();
+  document.getElementById('adOverlay').classList.remove('active');
+  setUnlockButtonLoading(false);
+  if(message)toast(message);
+  setTimeout(()=>preloadRewardAd(true),500);
+}
+function unlockAnalysis(){
+  const section=document.getElementById('analysisSection');
+  if(!section)return;
+  section.style.display='block';
+  section.scrollIntoView({behavior:'smooth'});
+}
+function completeRewardAdUnlock(sessionId,reason,response){
+  if(sessionId!==rewardAdSessionId||!rewardAdLoading)return;
+  rewardAdLoading=false;
+  rewardAdWatchStartedAt=0;
+  clearRewardAdTimers();
+  document.getElementById('adOverlay').classList.remove('active');
+  setUnlockButtonLoading(false);
+  logRewardAd('unlock analysis',{reason,response:response||null});
+  toast('广告观看完成，正在打开深度解析');
+  unlockAnalysis();
+  setTimeout(()=>preloadRewardAd(true),800);
+}
+function startRewardAdUnlockTimer(sessionId,reason){
+  if(sessionId!==rewardAdSessionId||!rewardAdLoading||rewardAdUnlockTimer)return;
+  const fill=document.getElementById('adProgressFill');
+  let left=rewardAdWatchDelay/1000;
+  rewardAdWatchStartedAt=Date.now();
+  fill.style.width='0';
+  document.getElementById('adTitle').innerHTML='激励视频播放中';
+  document.getElementById('adTimer').textContent='8 秒后自动解锁深度解析';
+  logRewardAd('start 8s unlock timer',{reason});
+  rewardAdProgressTimer=setInterval(()=>{
+    const elapsed=Date.now()-rewardAdWatchStartedAt;
+    const pct=Math.min(100,elapsed/rewardAdWatchDelay*100);
+    fill.style.width=pct+'%';
+    left=Math.max(0,Math.ceil((rewardAdWatchDelay-elapsed)/1000));
+    document.getElementById('adTimer').textContent=left>0?left+' 秒后自动解锁深度解析':'正在解锁深度解析';
+  },300);
+  rewardAdUnlockTimer=setTimeout(()=>completeRewardAdUnlock(sessionId,reason||'8s auto unlock'),rewardAdWatchDelay);
+}
+function handleRewardAdPageLeave(){
+  if(!rewardAdLoading)return;
+  startRewardAdUnlockTimer(rewardAdSessionId,'page leave');
+}
+function handleRewardAdPageReturn(){
+  if(!rewardAdLoading||!rewardAdWatchStartedAt)return;
+  if(Date.now()-rewardAdWatchStartedAt<rewardAdWatchDelay){
+    logRewardAd('return before 8s, reset reward state');
+    resetRewardAdWaiting('广告未观看满 8 秒，请重新观看');
+  }
+}
+function showAd(){
+  let sessionId;
+  if(rewardAdLoading)return;
+  if(!rewardAd&&!initRewardAd())return;
+  clearRewardAdTimers();
+  rewardAdSessionId++;
+  sessionId=rewardAdSessionId;
+  rewardAdWatchStartedAt=0;
+  rewardAdLoading=true;
+  setUnlockButtonLoading(true);
+  showRewardAdOverlay('正在拉起激励视频','进入广告后 8 秒自动解锁深度解析');
+  preloadRewardAd(true);
+  setTimeout(()=>{
+    if(sessionId!==rewardAdSessionId||!rewardAdLoading)return;
+    rewardAd.show({
+      data:{from:'mental-age-test',reward:'unlock_analysis'}
+    },(error,response,meta)=>{
+      if(sessionId!==rewardAdSessionId||!rewardAdLoading)return;
+      if(error){
+        logRewardAd('show failed',{message:error.message});
+        resetRewardAdWaiting();
+        toast('激励视频展示失败，请稍后再试');
+        return;
+      }
+      if(meta&&meta.timeout){
+        logRewardAd('show callback timeout, unlock by 8s fallback');
+        completeRewardAdUnlock(sessionId,'connectVideo 8s timeout',response);
+        return;
+      }
+      logRewardAd('connectVideo callback received',response);
+      startRewardAdUnlockTimer(sessionId,'connectVideo callback');
+    });
+    rewardAdLaunchFallbackTimer=setTimeout(()=>startRewardAdUnlockTimer(sessionId,'launch fallback'),1200);
+  },300);
+}
+function closeAd(){
+  resetRewardAdWaiting('已取消等待，可重新点击观看');
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)handleRewardAdPageLeave();
+  else handleRewardAdPageReturn();
+});
+window.addEventListener('pagehide',handleRewardAdPageLeave);
+window.addEventListener('pageshow',handleRewardAdPageReturn);
+window.addEventListener('blur',handleRewardAdPageLeave);
+window.addEventListener('focus',handleRewardAdPageReturn);
+function retry(){resetRewardAdWaiting();show('home')}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+preloadRewardAd(true);
+</script>
+</body>
+</html>
